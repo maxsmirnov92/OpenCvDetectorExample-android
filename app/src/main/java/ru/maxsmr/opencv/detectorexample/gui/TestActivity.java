@@ -630,7 +630,12 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                         try {
                             FileHelper.copyRawFile(TestActivity.this, R.raw.hogcascade_pedestrians, humanClassifierFile, FileHelper.FILE_PERMISSIONS_ALL);
                         } catch (Exception e) {
-                            Toast.makeText(TestActivity.this, R.string.toast_file_read_unsuccessful, Toast.LENGTH_SHORT).show();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(TestActivity.this, R.string.toast_file_read_unsuccessful, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                             return;
                         }
                         List<ObjectDetectVideoInfo> objectDetectVideoInfos = testObjectDetector(DefaultSettings.generateDefaultObjectDetectorSettings(), humanClassifierFile);
@@ -646,7 +651,12 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                                 FileHelper.copyRawFile(TestActivity.this, R.raw.haarcascade_frontalface_alt, faceClassifierFile, FileHelper.FILE_PERMISSIONS_ALL);
                                 detector = new ClassifierDetector(TestActivity.this, OBJECT_TYPE.FACE, faceClassifierFile, false, null);
                             } catch (Exception e) {
-                                Toast.makeText(TestActivity.this, R.string.toast_file_read_unsuccessful, Toast.LENGTH_SHORT).show();
+                                runOnUiThread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        Toast.makeText(TestActivity.this, R.string.toast_file_read_unsuccessful, Toast.LENGTH_SHORT).show();
+                                    }
+                                });
                                 return;
                             }
 
@@ -657,20 +667,30 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                                 logger.debug("info=" + info);
                                 Mat resultMat = OpenCvUtils.convertByteArrayToMat(info.getSceneImage(), info.getWidth(), info.getHeight(), info.getType());
                                 Bitmap resultBitmap = OpenCvUtils.convertMatToBitmap(resultMat, true);
-                                displayResultBitmap(resultBitmap);
+                                displayResultBitmap(resultBitmap, info.detected());
                             }
 
                         } else {
-                            Toast.makeText(TestActivity.this, R.string.toast_file_read_unsuccessful, Toast.LENGTH_SHORT).show();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(TestActivity.this, R.string.toast_file_read_unsuccessful, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                         break;
 
                     case EDGE:
                         if (GraphicUtils.canDecodeImage(lastPictureFile)) {
                             Bitmap resultBitmap = OpenCvUtils.detectEdges(lastPictureFile, OpenCvUtils.CANNY_THRESHOLD_DEFAULT, OpenCvUtils.CANNY_RATIO_DEFAULT);
-                            displayResultBitmap(resultBitmap);
+                            displayResultBitmap(resultBitmap, true);
                         } else {
-                            Toast.makeText(TestActivity.this, R.string.toast_file_read_unsuccessful, Toast.LENGTH_SHORT).show();
+                            runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(TestActivity.this, R.string.toast_file_read_unsuccessful, Toast.LENGTH_SHORT).show();
+                                }
+                            });
                         }
                         break;
                 }
@@ -705,11 +725,11 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
             });
         }
 
-        private void displayResultBitmap(final Bitmap bm) {
+        private void displayResultBitmap(final Bitmap bm, final boolean detected) {
             runOnUiThread(new Runnable() {
                 @Override
                 public void run() {
-                    if (GraphicUtils.isBitmapCorrect(bm)) {
+                    if (detected && GraphicUtils.isBitmapCorrect(bm)) {
                         displayPicture(bm);
                     } else {
                         Toast.makeText(TestActivity.this, R.string.toast_detection_unsuccessful, Toast.LENGTH_SHORT).show();
