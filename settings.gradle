@@ -1,0 +1,1 @@
+include ':app', ':opencv-library', ':commonutils', ':OpenCvCommonDetector-lib', ':OpenCvAndroidDetector-lib', 'recyclerview-lib'

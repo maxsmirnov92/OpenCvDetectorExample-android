@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="@dimen/listitem_height"
+    android:orientation="vertical"
+    android:padding="@dimen/space_4">
+    <!--android:background="@style/Ripple"-->
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_toLeftOf="@+id/ivDelete"
+        android:layout_toStartOf="@+id/ivDelete"
+        android:fillViewport="true">
+
+        <TextView
+            android:id="@+id/tvFileName"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:ellipsize="end"
+            android:gravity="start"
+            android:lines="1"
+            android:padding="10dp"
+            android:singleLine="true"
+            android:text="file1"
+            android:textColor="@android:color/black"
+            android:textSize="16sp" />
+
+    </HorizontalScrollView>
+
+    <ImageView
+        android:id="@+id/ivDelete"
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_marginLeft="10dp"
+        android:layout_marginStart="10dp"
+        android:scaleType="centerInside"
+        android:src="@android:drawable/ic_menu_delete" />
+
+</RelativeLayout>

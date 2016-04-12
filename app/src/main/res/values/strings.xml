@@ -1,0 +1,29 @@
+<resources>
+    <string name="app_name">OpenCvDetectorExample</string>
+
+    <string name="action_start">Start</string>
+
+    <string name="placeholder_add_video_files">Add video files</string>
+    <string name="placeholder_add_picture">Add picture</string>
+    <string name="placeholder_incorrect_file">Incorrect file</string>
+    <string name="placeholder_no_file">No file</string>
+
+    <string name="loading">Loading...</string>
+    <string name="processing">Processing...</string>
+
+    <string name="toast_cant_start">Choose data first!</string>
+    <string name="toast_incorrect_video_file">Incorrect video file</string>
+    <string name="toast_incorrect_picture_file">Incorrect picture file</string>
+    <string name="toast_file_read_unsuccessful">File read unsuccessful</string>
+    <string name="toast_detection_successful">Detection completed successfully</string>
+    <string name="toast_detection_results">Results in %1s</string>
+    <string name="toast_detection_unsuccessful">Detection unsuccessful</string>
+    <string name="toast_execution_time">Execution time: %1s</string>
+
+    <string name="dialog_opencv_init_failure_title">OpenCV initialization failed</string>
+    <string name="dialog_opencv_init_failure_message">Please download OpenCV Manager (version: %1s)</string>
+
+    <string name="dialog_cancel_detection_title">Confirm cancel</string>
+    <string name="dialog_cancel_detection_message">Are you sure you want to cancel current detection process?</string>
+
+</resources>

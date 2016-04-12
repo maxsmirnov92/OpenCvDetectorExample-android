@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <color name="blue">#1096ff</color>
+    <color name="blue_dark">#23369a</color>
+    <color name="blue_middle">#6ea1e0</color>
+    <color name="blue_light">#e1e6ff</color>
+
+    <color name="A">#000</color>
+    <color name="B">#00F</color>
+    <color name="C">#0F0</color>
+    <color name="D">#0FF</color>
+    <color name="E">#F00</color>
+    <color name="F">#F0F</color>
+    <color name="G">#FF0</color>
+    <color name="H">#FFF</color>
+
+    <color name="green">#11Ac66</color>
+
+    <color name="colorPrimary">@color/blue_middle</color>
+    <color name="colorPrimaryDark">@color/blue_dark</color>
+    <color name="colorSecondary">@android:color/white</color>
+    <color name="colorAccent">@color/green</color>
+</resources>
