@@ -1,13 +1,13 @@
 package ru.maxsmr.opencv.androiddetector;
 
+import android.content.Context;
+import android.support.annotation.NonNull;
+
 import org.opencv.android.BaseLoaderCallback;
 import org.opencv.android.LoaderCallbackInterface;
 import org.opencv.android.OpenCVLoader;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import android.content.Context;
-import android.support.annotation.NonNull;
 
 public final class OpenCvInit {
 
@@ -28,7 +28,8 @@ public final class OpenCvInit {
         try {
             initOpenCvManager();
         } catch (RuntimeException e) {
-            logger.error("a RuntimeException occured during initOpenCvManager(): {}", e.getMessage());
+            e.printStackTrace();
+            logger.error("a RuntimeException occurred during initOpenCvManager(): {}", e.getMessage());
 
             isOpenCvManagerInitComplete = true;
             isOpenCvManagerLoaded = false;

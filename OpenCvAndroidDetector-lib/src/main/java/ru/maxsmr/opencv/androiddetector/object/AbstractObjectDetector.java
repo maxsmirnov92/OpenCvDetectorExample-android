@@ -1,25 +1,24 @@
 package ru.maxsmr.opencv.androiddetector.object;
 
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
+import android.graphics.Bitmap;
+import android.util.Pair;
 
 import org.opencv.core.Mat;
 import org.opencv.core.Scalar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import android.graphics.Bitmap;
-import android.util.Pair;
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
+import ru.maxsmr.commonutils.data.FileHelper;
+import ru.maxsmr.commonutils.graphic.GraphicUtils;
 import ru.maxsmr.opencv.commondetector.model.DETECTOR_SENSITIVITY;
 import ru.maxsmr.opencv.commondetector.model.graphic.Point;
 import ru.maxsmr.opencv.commondetector.model.object.info.ObjectDetectFrameInfo;
 import ru.maxsmr.opencv.commondetector.model.object.info.ObjectDetectVideoInfo;
 import ru.maxsmr.opencv.commondetector.model.object.settings.ObjectDetectorSettings;
-
-import ru.maxsmr.commonutils.data.FileHelper;
-import ru.maxsmr.commonutils.graphic.GraphicUtils;
 import ru.maxsmr.opencv.commondetector.utils.OpenCvUtils;
 
 
@@ -96,7 +95,7 @@ public abstract class AbstractObjectDetector {
         int extractedFramesCount = 0;
 
         int detectedFramesCount = 0;
-        List<Long> detectedFramesPositions = new ArrayList<Long>();
+        List<Long> detectedFramesPositions = new ArrayList<>();
 
         for (Pair<Long, Bitmap> currentFrame : retrievedFrames) {
 
@@ -123,9 +122,9 @@ public abstract class AbstractObjectDetector {
             if (savedFramesDir != null) {
                 logger.debug("saving source frame (position " + currentFrame.second + " ms) to file...");
 
-                GraphicUtils.writeCompressedBitmapToFile(new File(videoFile.getName() + "_"
-                        + currentFrame.first + "_ms", savedFramesDir.getAbsolutePath() + File.separator + videoFile.getName()
-                        + File.separator + SOURCE_FRAME_DIR), frameBitmap, Bitmap.CompressFormat.PNG);
+                GraphicUtils.writeCompressedBitmapToFile(new File(savedFramesDir.getAbsolutePath() + File.separator + videoFile.getName()
+                        + File.separator + SOURCE_FRAME_DIR, videoFile.getName() + "_"
+                        + currentFrame.first + "_ms"), frameBitmap, Bitmap.CompressFormat.PNG);
 
             }
 
@@ -133,10 +132,10 @@ public abstract class AbstractObjectDetector {
                     frameBitmap.getHeight(), sensitivity, region);
             frameInfos.add(info);
 
-            Mat resultMat = OpenCvUtils.convertByteArrayToMat(info.getSceneImage(), info.getType(), info.getWidth(), info.getHeight());
+            Mat resultMat = OpenCvUtils.convertByteArrayToMat(info.getSceneImage(), info.getWidth(), info.getHeight(), info.getType());
             frameBitmap = OpenCvUtils.convertMatToBitmap(resultMat, true);
 
-            if (info != null && info.detected()) {
+            if (info.detected()) {
 
                 logger.info(info.getObjects() + " object(s) detected in file " + videoFile.getName() + ", position: "
                         + currentFrame.first + " ms");
@@ -147,14 +146,16 @@ public abstract class AbstractObjectDetector {
                 if (savedFramesDir != null) {
                     logger.debug("saving detected frame (position " + currentFrame.first + " ms) to file...");
 
-                    GraphicUtils.writeCompressedBitmapToFile(new File(videoFile.getName() + "_"
-                            + currentFrame.first + "_ms", savedFramesDir.getAbsolutePath() + File.separator + videoFile.getName()
-                            + File.separator + DETECTED_FRAME_DIR), getLastFrame(), Bitmap.CompressFormat.PNG);
+                    GraphicUtils.writeCompressedBitmapToFile(new File(savedFramesDir.getAbsolutePath() + File.separator + videoFile.getName()
+                            + File.separator + DETECTED_FRAME_DIR, videoFile.getName() + "_"
+                            + currentFrame.first + "_ms"), getLastFrame(), Bitmap.CompressFormat.PNG);
 
                 }
             }
 
-            frameBitmap.recycle();
+            if (frameBitmap != null) {
+                frameBitmap.recycle();
+            }
         }
 
         final long detectionTime = System.currentTimeMillis() - startTime;

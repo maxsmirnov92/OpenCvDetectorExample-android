@@ -8,6 +8,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
+import android.widget.Checkable;
 
 import com.bejibx.android.recyclerview.selection.SelectionHelper;
 
@@ -36,42 +37,6 @@ public abstract class BaseSingleSelectionRecyclerViewAdapter<I, VH extends BaseR
     @NonNull
     public abstract Set<SelectionHelper.SelectMode> getSelectionModes();
 
-    @CallSuper
-    protected void processSelection(VH holder, final I item, final int position) {
-        for (SelectionHelper.SelectMode mode : getSelectionModes()) {
-            switch (mode) {
-                case CLICK:
-                    holder.itemView.setClickable(true);
-                    holder.itemView.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            if (position == selection) {
-                                toggleSelection(position);
-                            } else {
-                                setSelection(position);
-                            }
-                        }
-                    });
-                    break;
-
-                case LONG_CLICK:
-                    holder.itemView.setLongClickable(true);
-                    holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
-                        @Override
-                        public boolean onLongClick(View v) {
-                            if (position == selection) {
-                                toggleSelection(position);
-                            } else {
-                                setSelection(position);
-                            }
-                            return true;
-                        }
-                    });
-                    break;
-            }
-        }
-    }
-
     @Nullable
     public Drawable getDefaultDrawable() {
         return defaultDrawable;
@@ -96,11 +61,71 @@ public abstract class BaseSingleSelectionRecyclerViewAdapter<I, VH extends BaseR
             notifyDataSetChanged();
     }
 
+    protected boolean allowTogglingSelection() {
+        return true;
+    }
+
     @Override
     @CallSuper
-    protected void processItem(@NonNull VH holder, I item, int position) {
+    protected void processItem(@NonNull VH holder, @Nullable I item, int position) {
         super.processItem(holder, item, position);
         processSelection(holder, item, position);
+    }
+
+    private void processSelection(@NonNull VH holder, @Nullable final I item, final int position) {
+        for (SelectionHelper.SelectMode mode : getSelectionModes()) {
+            switch (mode) {
+                case CLICK:
+                    holder.itemView.setClickable(true);
+                    holder.itemView.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            if (position == selection) {
+                                if (allowTogglingSelection()) {
+                                    toggleSelection(position, true);
+                                }
+                            } else {
+                                setSelection(position, true);
+                            }
+                        }
+                    });
+                    break;
+
+                case LONG_CLICK:
+                    holder.itemView.setLongClickable(true);
+                    holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                        @Override
+                        public boolean onLongClick(View v) {
+                            if (position == selection) {
+                                if (allowTogglingSelection()) {
+                                    toggleSelection(position, true);
+                                }
+                            } else {
+                                setSelection(position, true);
+                            }
+                            return true;
+                        }
+                    });
+                    break;
+            }
+        }
+        boolean isItemSelected = isItemSelected(item);
+        if (holder.itemView instanceof Checkable) {
+            ((Checkable) holder.itemView).setChecked(isItemSelected);
+        }
+        if (isItemSelected) {
+            onProcessItemSelected(holder);
+        } else {
+            onProcessItemNotSelected(holder);
+        }
+    }
+
+    protected void onProcessItemSelected(@NonNull VH holder) {
+
+    }
+
+    protected void onProcessItemNotSelected(@NonNull VH holder) {
+
     }
 
     private int selection = RecyclerView.NO_POSITION;
@@ -109,24 +134,37 @@ public abstract class BaseSingleSelectionRecyclerViewAdapter<I, VH extends BaseR
         return selection != RecyclerView.NO_POSITION;
     }
 
-    public I getSelectedItem() {
-        return getItem(selection);
-    }
-
     public int getSelectedPosition() {
         return selection;
     }
 
-    public void setSelectionByItem(I selection) {
-        setSelection(indexOf(selection));
+    public I getSelectedItem() {
+        return getItem(selection);
+    }
+
+    public boolean isItemPositionSelected(int position) {
+        rangeCheck(position);
+        return selection != RecyclerView.NO_POSITION && selection == position;
+    }
+
+    public boolean isItemSelected(I item) {
+        return isItemPositionSelected(indexOf(item));
+    }
+
+    public void setSelectionByItem(I item) {
+        setSelection(indexOf(item));
     }
 
     public void setSelection(int selection) {
+        setSelection(selection, false);
+    }
+
+    protected void setSelection(int selection, boolean fromUser) {
         rangeCheck(selection);
         if (this.selection != selection) {
             int previousSelection = this.selection;
             this.selection = selection;
-            onSelectionChanged(previousSelection, this.selection);
+            onSelectionChanged(previousSelection, this.selection, fromUser);
             if (isNotifyOnChange()) {
                 notifyItemChanged(previousSelection);
                 notifyItemChanged(selection);
@@ -135,10 +173,14 @@ public abstract class BaseSingleSelectionRecyclerViewAdapter<I, VH extends BaseR
     }
 
     public void resetSelection() {
+        resetSelection(false);
+    }
+
+    private void resetSelection(boolean fromUser) {
         if (isSelected()) {
             int previousSelection = this.selection;
             this.selection = RecyclerView.NO_POSITION;
-            onSelectionChanged(previousSelection, this.selection);
+            onSelectionChanged(previousSelection, this.selection, fromUser);
             if (isNotifyOnChange()) {
                 notifyItemChanged(previousSelection);
             }
@@ -146,19 +188,27 @@ public abstract class BaseSingleSelectionRecyclerViewAdapter<I, VH extends BaseR
     }
 
     public void toggleSelection(int selection) {
+        toggleSelection(selection, false);
+    }
+
+    private void toggleSelection(int selection, boolean fromUser) {
         if (isSelected()) {
-            resetSelection();
+            resetSelection(fromUser);
         } else {
-            setSelection(selection);
+            setSelection(selection, fromUser);
         }
     }
 
-    protected void onSelectionChanged(int from, int to) {
+    /**
+     * called before {@link #notifyItemChanged(int)}}
+     */
+    @CallSuper
+    protected void onSelectionChanged(int from, int to, boolean fromUser) {
         if (selectedChangeListener != null) {
             if (selection != RecyclerView.NO_POSITION) {
-                selectedChangeListener.onSetSelection(from, to);
+                selectedChangeListener.onSetSelection(from, to, fromUser);
             } else {
-                selectedChangeListener.onResetSelection(from);
+                selectedChangeListener.onResetSelection(from, fromUser);
             }
         }
     }
@@ -172,8 +222,8 @@ public abstract class BaseSingleSelectionRecyclerViewAdapter<I, VH extends BaseR
 
     public interface OnSelectedChangeListener {
 
-        void onSetSelection(int fromIndex, int toIndex);
+        void onSetSelection(int fromIndex, int toIndex, boolean fromUser);
 
-        void onResetSelection(int fromIndex);
+        void onResetSelection(int onIndex, boolean fromUser);
     }
 }

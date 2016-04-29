@@ -56,11 +56,7 @@ public abstract class BaseCheckableRecyclerViewAdapter<I, VH extends BaseRecycle
     @NonNull
     public abstract Set<SelectionHelper.SelectMode> getSelectionModes();
 
-    @Override
-    @CallSuper
-    protected void processItem(@NonNull VH holder, I item, int position) {
-        super.processItem(holder, item, position);
-
+    private void processSelection(@NonNull VH holder, @Nullable I item, int position) {
         mSelectionHelper.wrapSelectable(holder, getSelectionModes());
 
         final boolean isSelected = isItemSelected(position);
@@ -77,7 +73,19 @@ public abstract class BaseCheckableRecyclerViewAdapter<I, VH extends BaseRecycle
     }
 
     @Override
+    @CallSuper
+    protected void processItem(@NonNull VH holder, @Nullable I item, int position) {
+        super.processItem(holder, item, position);
+        processSelection(holder, item, position);
+    }
+
+    @Override
     protected final boolean allowSetClickListener() {
+        return false;
+    }
+
+    @Override
+    protected final boolean allowSetLongClickListener() {
         return false;
     }
 
@@ -180,6 +188,10 @@ public abstract class BaseCheckableRecyclerViewAdapter<I, VH extends BaseRecycle
         return mSelectionHelper != null && mSelectionHelper.isItemSelected(position);
     }
 
+    public boolean isItemSelected(I item) {
+        return isItemSelected(indexOf(item));
+    }
+
     public int getSelectedItemsCount() {
         return getItemCount() > 0 && mSelectionHelper != null ? mSelectionHelper.getSelectedItemsCount() : 0;
     }
@@ -247,19 +259,19 @@ public abstract class BaseCheckableRecyclerViewAdapter<I, VH extends BaseRecycle
     }
 
 
-    protected void onProcessItemSelected(VH holder) {
+    protected void onProcessItemSelected(@NonNull VH holder) {
 
     }
 
-    protected void onProcessItemNotSelected(VH holder) {
+    protected void onProcessItemNotSelected(@NonNull VH holder) {
 
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public final void onSelectedChanged(RecyclerView.ViewHolder holder, boolean isSelected) {
-        if (selectedChangeListener != null) {
-            selectedChangeListener.onSelectedChange(holder.getAdapterPosition());
+        if (checkedChangeListener != null) {
+            checkedChangeListener.onCheckedChange(holder.getAdapterPosition());
         }
         if (isNotifyOnChange())
             notifyItemChanged(holder.getAdapterPosition());
@@ -282,14 +294,14 @@ public abstract class BaseCheckableRecyclerViewAdapter<I, VH extends BaseRecycle
 
 
     @Nullable
-    private OnSelectedChangeListener selectedChangeListener;
+    private OnCheckedChangeListener checkedChangeListener;
 
-    public void setOnSelectedChangeListener(@Nullable OnSelectedChangeListener selectedChangeListener) {
-        this.selectedChangeListener = selectedChangeListener;
+    public void setOnCheckedChangeListener(@Nullable OnCheckedChangeListener checkedChangeListener) {
+        this.checkedChangeListener = checkedChangeListener;
     }
 
-    public interface OnSelectedChangeListener {
-        void onSelectedChange(int position);
+    public interface OnCheckedChangeListener {
+        void onCheckedChange(int position);
     }
 
 }

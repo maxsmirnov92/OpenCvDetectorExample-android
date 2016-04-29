@@ -5,10 +5,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +21,9 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
@@ -55,8 +61,8 @@ import ru.maxsmr.opencv.commondetector.model.object.info.ObjectDetectVideoInfo;
 import ru.maxsmr.opencv.commondetector.model.object.settings.OBJECT_TYPE;
 import ru.maxsmr.opencv.commondetector.model.object.settings.ObjectDetectorSettings;
 import ru.maxsmr.opencv.commondetector.utils.OpenCvUtils;
-import ru.maxsmr.opencv.detectorexample.app.DefaultSettings;
 import ru.maxsmr.opencv.detectorexample.R;
+import ru.maxsmr.opencv.detectorexample.app.DefaultSettings;
 import ru.maxsmr.opencv.detectorexample.app.Paths;
 import ru.maxsmr.opencv.detectorexample.gui.adapters.FileAdapter;
 import ru.maxsmr.opencv.detectorexample.gui.progressable.DialogProgressable;
@@ -69,6 +75,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+        setStatusBarColor(ContextCompat.getColor(this, R.color.statusBarColor));
         init();
         invalidateStateByCurrentSpinnerPosition();
     }
@@ -93,6 +100,15 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                 break;
         }
         return handled || super.onOptionsItemSelected(item);
+    }
+
+    public void setStatusBarColor(@ColorInt int colorId) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.setStatusBarColor(colorId);
+        }
     }
 
     private DetectorTaskRunnable detectorTaskRunnable;
@@ -153,6 +169,8 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
 
     private File lastPictureFile;
 
+    FloatingActionButton addFileButton;
+
     private void init() {
         initToolbar();
         initSpinner();
@@ -160,7 +178,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         placeholder = (TextView) findViewById(R.id.tvPlaceholder);
         pictureView = (ImageView) findViewById(R.id.ivPicture);
         pictureView.setOnClickListener(this);
-        FloatingActionButton addFileButton = (FloatingActionButton) findViewById(R.id.fabAddFile);
+        addFileButton = (FloatingActionButton) findViewById(R.id.fabAddFile);
         addFileButton.setOnClickListener(this);
     }
 
@@ -329,6 +347,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                 displayPicture(lastPictureFile);
                 break;
         }
+        addFileButton.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fab_show));
     }
 
     @Override
@@ -499,7 +518,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         this.dialogProgressable.setOnBackPressedListener(this);
         this.dialogProgressable.setOnDismissListener(this);
         this.dialogProgressable.setMessage(getString(R.string.processing));
-        this.dialogProgressable.setIndeterminate(true, 0);
+        this.dialogProgressable.setIndeterminate(true);
         this.dialogProgressable.setCancelable(false);
         this.dialogProgressable.onStart();
     }

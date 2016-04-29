@@ -7,9 +7,13 @@ import android.support.annotation.MainThread;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.view.KeyEvent;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.lang.reflect.Field;
 
 import ru.maxsmr.opencv.detectorexample.R;
 
@@ -17,8 +21,13 @@ public class DialogProgressable implements Progressable, DialogInterface.OnKeyLi
 
     protected static final Logger logger = LoggerFactory.getLogger(DialogProgressable.class);
 
+    @NonNull
     private final Context context;
+
     private ProgressDialog progressDialog;
+
+//    @LayoutRes
+//    private int customLayoutId = 0;
 
     //    private final String defaultTitle;
     private String title;
@@ -38,22 +47,20 @@ public class DialogProgressable implements Progressable, DialogInterface.OnKeyLi
 
 
     public DialogProgressable(@NonNull Context context) {
-        this(context, "", context.getString(R.string.loading), true, 0, false);
+        this(context, true, 0, false);
     }
 
     public DialogProgressable(@NonNull Context context, boolean indeterminate, int max, boolean cancelable) {
-        this(context, null, null, indeterminate, max, cancelable);
+        this(context, null, context.getString(R.string.loading), indeterminate, max, cancelable);
     }
 
-    public DialogProgressable(@NonNull Context context, @Nullable String title, @Nullable String message, boolean indeterminate, int max, boolean cancelable) {
+    public DialogProgressable(@NonNull Context context/*, @LayoutRes int customLayoutId, */, @Nullable String title, @Nullable String message, boolean indeterminate, int max, boolean cancelable) {
         this.context = context;
-//        this.defaultTitle = "";
-//        this.defaultMessage = context.getString(R.string.loading);
-//        title = TextUtils.isEmpty(title)? defaultTitle : title;
-//        message = TextUtils.isEmpty(message)? defaultMessage : message;
+//        setCustomLayoutId(customLayoutId);
         setTitle(title);
         setMessage(message);
-        setIndeterminate(indeterminate, max);
+        setIndeterminate(indeterminate);
+        setMax(max);
         setCancelable(cancelable);
     }
 
@@ -61,6 +68,7 @@ public class DialogProgressable implements Progressable, DialogInterface.OnKeyLi
         return progressDialog != null && progressDialog.isShowing();
     }
 
+    @MainThread
     private void begin() {
         if (!isStarted()) {
             progressDialog = new ProgressDialog(context);
@@ -81,6 +89,7 @@ public class DialogProgressable implements Progressable, DialogInterface.OnKeyLi
         }
     }
 
+    @MainThread
     private void end() {
         dismiss();
     }
@@ -98,23 +107,95 @@ public class DialogProgressable implements Progressable, DialogInterface.OnKeyLi
         }
     }
 
+    @Nullable
+    public ProgressBar getProgressBar() {
+        if (!isStarted()) {
+            throw new IllegalStateException("dialog was not started");
+        }
+
+        Field f = null;
+        try {
+            f = progressDialog.getClass().getDeclaredField("mProgress");
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+
+        if (f != null) {
+            f.setAccessible(true);
+            try {
+                return (ProgressBar) f.get(progressDialog);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public TextView getMessageView() {
+
+        if (!isStarted()) {
+            throw new IllegalStateException("dialog was not started");
+        }
+
+        Field f = null;
+        try {
+            f = progressDialog.getClass().getDeclaredField("mMessageView");
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        }
+
+        if (f != null) {
+            f.setAccessible(true);
+            try {
+                return (TextView) f.get(progressDialog);
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            }
+        }
+
+        return null;
+    }
+
+//    @Nullable
+//    private View inflateCustomLayout() {
+//        View dialogContentView = LayoutInflater.from(context).inflate(customLayoutId, null);
+//        ProgressBar progressBar = (ProgressBar) dialogContentView.findViewById(R.id.progress);
+//        GuiUtils.setProgressBarColor(ContextCompat.getColor(context, R.color.progressBarColor), progressBar);
+//        return dialogContentView;
+//    }
+
+//    @LayoutRes
+//    public int getCustomLayoutId() {
+//        return customLayoutId;
+//    }
+//
+//    public void setCustomLayoutId(@LayoutRes int layoutId) {
+//        customLayoutId = layoutId;
+//    }
+
     public boolean isIndeterminate() {
         return indeterminate;
     }
-
 
     public int getMax() {
         return max;
     }
 
-    public DialogProgressable setIndeterminate(boolean indeterminate, int max) {
+    public DialogProgressable setIndeterminate(boolean indeterminate) {
         this.indeterminate = indeterminate;
-        this.max = max < 0 ? 0 : max;
         if (isStarted()) {
             progressDialog.setIndeterminate(indeterminate);
-            if (!indeterminate) {
-                progressDialog.setMax(max);
-            }
+        }
+        return this;
+    }
+
+    public DialogProgressable setMax(int max) {
+        this.max = max < 0 ? 0 : max;
+        if (isStarted()) {
+            logger.debug("setting max: " + max);
+            progressDialog.setMax(this.max);
         }
         return this;
     }

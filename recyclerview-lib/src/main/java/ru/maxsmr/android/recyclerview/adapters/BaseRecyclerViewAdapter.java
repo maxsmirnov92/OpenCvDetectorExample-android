@@ -29,49 +29,41 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
         this.setItems(items);
     }
 
-    @Nullable
-    private List<I> mItems;
+    @NonNull
+    private final ArrayList<I> mItems = new ArrayList<>();
 
     protected final void rangeCheck(int position) {
-        if (mItems == null) {
-            throw new RuntimeException("no items");
-        }
         if (position < 0 || position >= mItems.size()) {
             throw new IndexOutOfBoundsException("incorrect position: " + position);
         }
     }
 
     protected final void rangeCheckForAdd(int position) {
-        if (mItems == null) {
-            throw new RuntimeException("no items");
-        }
         if (position < 0 || position > mItems.size()) {
             throw new IndexOutOfBoundsException("incorrect add position: " + position);
         }
     }
 
-    @Nullable
+    @NonNull
     public ArrayList<I> getItems() {
-        return mItems != null ? new ArrayList<>(mItems) : null;
+        return new ArrayList<>(mItems);
     }
 
     @Nullable
     public I getItem(int at) {
         rangeCheck(at);
-        return mItems != null ? mItems.get(at) : null;
+        return mItems.get(at);
     }
 
     public int indexOf(I item) {
-        if (mItems == null) {
-            throw new RuntimeException("no items");
-        }
         return mItems.indexOf(item);
     }
 
+    public int lastIndexOf(I item) {
+        return mItems.lastIndexOf(item);
+    }
+
     public void sort(@NonNull Comparator<? super I> comparator) {
-        if (mItems == null) {
-            throw new RuntimeException("no items");
-        }
         Collections.sort(mItems, comparator);
         if (notifyOnChange) notifyDataSetChanged();
     }
@@ -80,7 +72,10 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
      * @param items null for reset adapter
      */
     public final synchronized void setItems(@Nullable List<I> items) {
-        this.mItems = items != null ? new ArrayList<>(items) : null;
+        this.mItems.clear();
+        if (items != null) {
+            this.mItems.addAll(items);
+        }
         onItemsSet();
         if (notifyOnChange)
             notifyDataSetChanged();
@@ -91,9 +86,6 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
     }
 
     public final synchronized void clearItems() {
-        if (mItems == null) {
-            throw new RuntimeException("no items");
-        }
         int previousSize = getItemCount();
         mItems.clear();
         onItemsCleared();
@@ -106,9 +98,6 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
     }
 
     public final synchronized void addItem(int to, @Nullable I item) {
-        if (mItems == null) {
-            throw new RuntimeException("no items");
-        }
         rangeCheckForAdd(to);
         mItems.add(to, item);
         onItemAdded(to, item);
@@ -117,9 +106,6 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
     }
 
     public final synchronized void addItem(@Nullable I item) {
-        if (mItems == null) {
-            mItems = new ArrayList<>();
-        }
         addItem(getItemCount(), item);
     }
 
@@ -137,9 +123,6 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
     }
 
     public final synchronized void setItem(int in, @Nullable I item) {
-        if (mItems == null) {
-            throw new RuntimeException("no items");
-        }
         rangeCheck(in);
         mItems.set(in, item);
         onItemSet(in, item);
@@ -156,9 +139,6 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
 
     @Nullable
     public final synchronized I removeItem(@Nullable I item) {
-        if (mItems == null) {
-            throw new RuntimeException("no items");
-        }
         final int removedPosition = indexOf(item);
         if (removedPosition != RecyclerView.NO_POSITION) {
             if (mItems.remove(item)) {
@@ -172,27 +152,18 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
     }
 
     public final synchronized void removeAllItems() {
-        if (mItems == null) {
-            throw new RuntimeException("no items");
-        }
         for (I item : mItems) {
             removeItem(item);
         }
     }
 
     public final synchronized I removeItem(int from) {
-        if (mItems == null) {
-            throw new RuntimeException("no items");
-        }
         rangeCheck(from);
         return removeItem(getItem(from));
     }
 
     @NonNull
     public final synchronized List<I> removeItemsRange(int from, int to) {
-        if (mItems == null) {
-            throw new RuntimeException("no items");
-        }
         rangeCheck(from);
         rangeCheck(to);
         List<I> removed = new ArrayList<>();
@@ -224,11 +195,13 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
 
     @Override
     public final void onBindViewHolder(VH holder, int position) {
-        final I item = (mItems != null && position >= 0 && position < mItems.size()) ? mItems.get(position) : null;
+        final I item = (position >= 0 && position < mItems.size()) ? mItems.get(position) : null;
         processItem(holder, item, position);
     }
 
     protected abstract boolean allowSetClickListener();
+
+    protected abstract boolean allowSetLongClickListener();
 
     @CallSuper
     protected void processItem(@NonNull VH holder, @Nullable final I item, final int position) {
@@ -249,6 +222,20 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
                     }
                 });
             }
+
+            if (allowSetLongClickListener()) {
+                holder.itemView.setOnLongClickListener(new View.OnLongClickListener() {
+                    @Override
+                    public boolean onLongClick(View v) {
+                        boolean consumed = false;
+                        if (itemLongClickListener != null) {
+                            consumed = itemLongClickListener.onItemLongClick(item);
+                        }
+                        return consumed;
+                    }
+                });
+            }
+
             holder.displayData(position, item);
 
         } else {
@@ -262,7 +249,7 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
 
     @Override
     public int getItemCount() {
-        return mItems != null ? mItems.size() : 0;
+        return mItems.size();
     }
 
     private boolean notifyOnChange = true;
@@ -290,13 +277,28 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
 //        }
     }
 
+    public interface OnItemLongClickListener<I> {
+        boolean onItemLongClick(I item);
+    }
+
+    private OnItemLongClickListener<I> itemLongClickListener;
+
+    public void setOnItemLongClickListener(OnItemLongClickListener<I> listener) {
+        if (allowSetLongClickListener()) {
+            this.itemLongClickListener = listener;
+        }
+//        else {
+//            throw new UnsupportedOperationException("setting long click listener is not allowed");
+//        }
+    }
+
     public interface OnProcessingItemListener<I, VH extends RecyclerView.ViewHolder> {
-        void onProcessingItem(VH holder, I item, int position);
+        void onProcessingItem(@NonNull VH holder, @Nullable I item, int position);
     }
 
     private OnProcessingItemListener<I, VH> processingItemListener;
 
-    public void setProcessingItemListener(OnProcessingItemListener<I, VH> l) {
+    public void setOnProcessingItemListener(OnProcessingItemListener<I, VH> l) {
         this.processingItemListener = l;
     }
 

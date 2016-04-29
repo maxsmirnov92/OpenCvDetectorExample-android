@@ -32,6 +32,11 @@ public class FileAdapter extends BaseRecyclerViewAdapter<File, FileAdapter.ViewH
     }
 
     @Override
+    protected boolean allowSetLongClickListener() {
+        return true;
+    }
+
+    @Override
     protected void processItem(@NonNull ViewHolder holder, @Nullable final File item, int position) {
         super.processItem(holder, item, position);
         holder.deleteItemView.setOnClickListener(new View.OnClickListener() {
