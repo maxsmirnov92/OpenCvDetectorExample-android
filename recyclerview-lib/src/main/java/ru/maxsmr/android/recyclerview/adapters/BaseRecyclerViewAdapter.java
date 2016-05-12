@@ -11,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -71,8 +72,8 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
     /**
      * @param items null for reset adapter
      */
-    public final synchronized void setItems(@Nullable List<I> items) {
-        this.mItems.clear();
+    public final synchronized void setItems(@Nullable Collection<I> items) {
+        clearItems();
         if (items != null) {
             this.mItems.addAll(items);
         }
@@ -86,11 +87,13 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
     }
 
     public final synchronized void clearItems() {
-        int previousSize = getItemCount();
-        mItems.clear();
-        onItemsCleared();
-        if (notifyOnChange)
-            notifyItemRangeRemoved(0, previousSize);
+        if (!isEmpty()) {
+            int previousSize = getItemCount();
+            mItems.clear();
+            onItemsCleared();
+            if (notifyOnChange)
+                notifyItemRangeRemoved(0, previousSize);
+        }
     }
 
     protected void onItemsCleared() {
@@ -203,6 +206,7 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
 
     protected abstract boolean allowSetLongClickListener();
 
+    @SuppressWarnings("unchecked")
     @CallSuper
     protected void processItem(@NonNull VH holder, @Nullable final I item, final int position) {
 
