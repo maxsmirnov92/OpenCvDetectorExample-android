@@ -51,7 +51,7 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
     }
 
     @Nullable
-    public I getItem(int at) {
+    public I getItem(int at) throws IndexOutOfBoundsException {
         rangeCheck(at);
         return mItems.get(at);
     }
@@ -100,7 +100,7 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
 
     }
 
-    public final synchronized void addItem(int to, @Nullable I item) {
+    public final synchronized void addItem(int to, @Nullable I item) throws IndexOutOfBoundsException {
         rangeCheckForAdd(to);
         mItems.add(to, item);
         onItemAdded(to, item);
@@ -142,29 +142,16 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
 
     @Nullable
     public final synchronized I removeItem(@Nullable I item) {
-        final int removedPosition = indexOf(item);
-        if (removedPosition != RecyclerView.NO_POSITION) {
-            if (mItems.remove(item)) {
-                onItemRemoved(removedPosition, item);
-                if (notifyOnChange)
-                    notifyItemRemoved(removedPosition);
-                return item;
-            }
-        }
-        return null;
-    }
-
-    public final synchronized void removeAllItems() {
-        for (I item : mItems) {
-            removeItem(item);
-        }
+        return removeItem(indexOf(item));
     }
 
     public final synchronized I removeItem(int from) {
         rangeCheck(from);
-        return removeItem(getItem(from));
+        I removedItem = getItem(from);
+        mItems.remove(from);
+        onItemRemoved(from, removedItem);
+        return removedItem;
     }
-
     @NonNull
     public final synchronized List<I> removeItemsRange(int from, int to) {
         rangeCheck(from);
@@ -174,6 +161,12 @@ public abstract class BaseRecyclerViewAdapter<I, VH extends BaseRecyclerViewAdap
             removed.add(removeItem(pos));
         }
         return removed;
+    }
+
+    public final synchronized void removeAllItems() {
+        for (I item : mItems) {
+            removeItem(item);
+        }
     }
 
     @CallSuper
