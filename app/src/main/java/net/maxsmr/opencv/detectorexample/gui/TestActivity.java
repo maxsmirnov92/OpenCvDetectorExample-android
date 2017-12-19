@@ -26,6 +26,13 @@ import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import android.os.Build;
+import android.support.annotation.ColorInt;
+import android.support.v4.content.ContextCompat;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.animation.AnimationUtils;
+
 import org.ngweb.android.api.filedialog.FileDialog;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Mat;
@@ -41,6 +48,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import net.maxsmr.android.recyclerview.adapters.BaseRecyclerViewAdapter;
+import net.maxsmr.commonutils.android.gui.progressable.DialogProgressable;
 import net.maxsmr.commonutils.data.CompareUtils;
 import net.maxsmr.commonutils.data.FileHelper;
 import net.maxsmr.commonutils.graphic.GraphicUtils;
@@ -61,17 +69,33 @@ import net.maxsmr.opencv.detectorexample.app.DefaultSettings;
 import net.maxsmr.opencv.detectorexample.R;
 import net.maxsmr.opencv.detectorexample.app.Paths;
 import net.maxsmr.opencv.detectorexample.gui.adapters.FileAdapter;
-import net.maxsmr.opencv.detectorexample.gui.progressable.DialogProgressable;
 
 public class TestActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener, BaseRecyclerViewAdapter.OnItemClickListener<File>,
         BaseRecyclerViewAdapter.OnItemsRemovedListener<File>, DialogProgressable.OnBackPressedListener, DialogInterface.OnDismissListener {
 
     private static final Logger logger = LoggerFactory.getLogger(TestActivity.class);
 
+    private Spinner navigationSpinner;
+
+    private ImageView pictureView;
+    private RecyclerView filesRecycler;
+    private FileAdapter fileAdapter;
+    private TextView placeholder;
+
+    private FloatingActionButton addFileButton;
+
+    private DialogProgressable dialogProgressable;
+
+    private File lastPictureFile;
+
+    private DetectorTaskRunnable detectorTaskRunnable;
+    private ExecutorService detectorTask;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_test);
+        setStatusBarColor(ContextCompat.getColor(this, R.color.statusBarColor));
         init();
         invalidateStateByCurrentSpinnerPosition();
     }
@@ -98,8 +122,14 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         return handled || super.onOptionsItemSelected(item);
     }
 
-    private DetectorTaskRunnable detectorTaskRunnable;
-    private ExecutorService detectorTask;
+    public void setStatusBarColor(@ColorInt int colorId) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Window window = getWindow();
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.setStatusBarColor(colorId);
+        }
+    }
 
     private boolean isDetectorTaskRunning() {
         return detectorTask != null && detectorTaskRunnable != null && detectorTaskRunnable.isRunning;
@@ -147,23 +177,14 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         restoreAdapterVideosFromWorkingDir();
     }
 
-    private Spinner navigationSpinner;
-
-    private ImageView pictureView;
-    private RecyclerView filesRecycler;
-    private FileAdapter fileAdapter;
-    private TextView placeholder;
-
-    private File lastPictureFile;
-
     private void init() {
         initToolbar();
         initSpinner();
         initRecycler();
-        placeholder = (TextView) findViewById(R.id.tvPlaceholder);
-        pictureView = (ImageView) findViewById(R.id.ivPicture);
+        placeholder = findViewById(R.id.tvPlaceholder);
+        pictureView = findViewById(R.id.ivPicture);
         pictureView.setOnClickListener(this);
-        FloatingActionButton addFileButton = (FloatingActionButton) findViewById(R.id.fabAddFile);
+        addFileButton = findViewById(R.id.fabAddFile);
         addFileButton.setOnClickListener(this);
     }
 
@@ -240,8 +261,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                             if (GraphicUtils.canDecodeVideo(file)) {
                                 File newFile = new File(Paths.getDefaultVideosDirPath().getAbsolutePath(), file.getName());
                                 if (!FileHelper.isFileExists(newFile.getAbsolutePath())) {
-                                    File videosDir = Paths.getDefaultVideosDirPath();
-                                    newFile = FileHelper.copyFile(file, file.getName(), videosDir.getParent(), true);
+                                    newFile = FileHelper.copyFile(file, Paths.getDefaultVideosDirPath().getAbsolutePath());
                                 }
                                 fileAdapter.addItem(newFile);
                                 displayFilesList();
@@ -333,6 +353,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                 displayPicture(lastPictureFile);
                 break;
         }
+        addFileButton.startAnimation(AnimationUtils.loadAnimation(this, R.anim.fab_show));
     }
 
     @Override
@@ -460,28 +481,12 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void restoreAdapterVideosFromWorkingDir() {
-        Set<File> videos = FileHelper.getFiles(Collections.singletonList(Paths.getDefaultVideosDirPath()), FileHelper.GetMode.FILES, new Comparator<File>() {
+        List<File> videos = FileHelper.getFiles(Paths.getDefaultVideosDirPath(), false, new Comparator<File>() {
             @Override
             public int compare(File lhs, File rhs) {
-                return CompareUtils.compareStrings(lhs.getName(), rhs.getName(), true, true);
+                return CompareUtils.compareStrings(lhs.getName(), rhs.getName(), true);
             }
-        }, new FileHelper.IGetNotifier() {
-            @Override
-            public boolean onProcessing(@NonNull File current, @NonNull Set<File> collected, int currentLevel) {
-                return true;
-            }
-
-            @Override
-            public boolean onGetFile(@NonNull File file) {
-                return true;
-            }
-
-            @Override
-            public boolean onGetFolder(@NonNull File folder) {
-                return true;
-            }
-        }, FileHelper.DEPTH_UNLIMITED);
-
+        });
         if (!fileAdapter.isEmpty()) {
             fileAdapter.clearItems();
         }
@@ -513,8 +518,6 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
             }
         }
     }
-
-    private DialogProgressable dialogProgressable;
 
     private boolean isDialogProgressableShowing() {
         return dialogProgressable != null && dialogProgressable.isStarted();
@@ -689,7 +692,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                             Bitmap sceneImageBitmap = GraphicUtils.createBitmapFromFile(lastPictureFile, 1);
                             if (sceneImageBitmap != null) {
                                 byte[] sceneImage = GraphicUtils.getBitmapData(sceneImageBitmap);
-                                ObjectDetectFrameInfo info = detector.detectObjectByByteArray(sceneImage, true, 0, sceneImageBitmap.getWidth(), sceneImageBitmap.getHeight(), DetectorSensivity.HIGH, null);
+                                ObjectDetectFrameInfo info = detector.detectObjectByByteArray(sceneImage, true, 0, sceneImageBitmap.getWidth(), sceneImageBitmap.getHeight(), DETECTOR_SENSITIVITY.HIGH, null);
                                 logger.debug("info=" + info);
                                 Mat resultMat = OpenCvUtils.convertByteArrayToMat(info.getSceneImage(), info.getWidth(), info.getHeight(), info.getType());
                                 Bitmap resultBitmap = OpenCvUtils.convertMatToBitmap(resultMat, true);

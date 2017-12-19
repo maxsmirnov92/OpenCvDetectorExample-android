@@ -134,7 +134,7 @@ public abstract class AbstractObjectDetector {
                     frameBitmap.getHeight(), sensitivity, region);
             frameInfos.add(info);
 
-            Mat resultMat = OpenCvUtils.convertByteArrayToMat(info.getSceneImage(), info.getType(), info.getWidth(), info.getHeight());
+            Mat resultMat = OpenCvUtils.convertByteArrayToMat(info.getSceneImage(), info.getWidth(), info.getHeight(), info.getType());
             frameBitmap = OpenCvUtils.convertMatToBitmap(resultMat, true);
 
             if (info.detected()) {
