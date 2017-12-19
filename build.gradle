@@ -4,12 +4,24 @@ buildscript {
         jcenter()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:1.5.0'
+        classpath 'com.android.tools.build:gradle:3.0.1'
     }
 }
 
 allprojects {
     repositories {
         jcenter()
+        maven { url 'https://dl.bintray.com/maxsmirnov92/maven' }
+        google()
     }
+}
+
+ext {
+    sdkVersion = 27
+    minSdkVersion_ = 14
+    buildToolsVersion_ = "27.0.2"
+    appCompatVersion = buildToolsVersion_
+
+    commonUtilsVersion = "1.0.3.4"
+    recyclerViewLibVersion = "1.0.3.11"
 }

@@ -1,12 +1,12 @@
 apply plugin: 'com.android.library'
 
 android {
-    compileSdkVersion 23
-    buildToolsVersion "23.0.2"
+    compileSdkVersion sdkVersion
+    buildToolsVersion buildToolsVersion_
 
     defaultConfig {
-        minSdkVersion 10
-        targetSdkVersion 23
+        minSdkVersion minSdkVersion_
+        targetSdkVersion sdkVersion
     }
 
     buildTypes {
@@ -23,5 +23,10 @@ android {
 }
 
 dependencies {
-    compile project(':OpenCvCommonDetector-lib')
+    compile "com.android.support:support-v4:$appCompatVersion"
+
+    implementation project(':OpenCvCommonDetector-lib')
+    implementation project(':opencv-library')
+
+    implementation "net.maxsmr:commonutils:$commonUtilsVersion"
 }
