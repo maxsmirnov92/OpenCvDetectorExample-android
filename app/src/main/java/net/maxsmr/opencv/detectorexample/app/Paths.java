@@ -39,7 +39,7 @@ public final class Paths {
 
     @NonNull
     public static File getDefaultLogDirPath() {
-        return makeLogDirPath(getDefaultWorkingDir());
+        return makeLogDirPath(new File(APP_DATA_INTERNAL_PATH));
     }
 
     public static final String LOG_FILENAME = "OpenCvDetectorExample.log";

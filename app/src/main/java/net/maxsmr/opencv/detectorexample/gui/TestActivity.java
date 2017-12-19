@@ -1,13 +1,16 @@
 package net.maxsmr.opencv.detectorexample.gui;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
@@ -261,7 +264,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                                 File newFile = new File(Paths.getDefaultVideosDirPath().getAbsolutePath(), file.getName());
                                 if (!FileHelper.isFileExists(newFile.getAbsolutePath())) {
                                     File videosDir = Paths.getDefaultVideosDirPath();
-                                    newFile = FileHelper.copyFile(file,  videosDir.getParent(), file.getName(), true);
+                                    newFile = FileHelper.copyFile(file, videosDir.getParent(), file.getName(), true);
                                 }
                                 fileAdapter.addItem(newFile);
                                 displayFilesList();
@@ -448,7 +451,9 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         Intent viewIntent = new Intent(Intent.ACTION_VIEW);
         viewIntent.setData(Uri.parse(url));
         viewIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        startActivity(viewIntent);
+        if (canHandleIntent(this, viewIntent)) {
+            startActivity(viewIntent);
+        }
         finish();
     }
 
@@ -609,7 +614,6 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     public void onDismiss(DialogInterface dialog) {
         dialogProgressable = null;
     }
-
 
     private class DetectorTaskRunnable implements Runnable {
 
@@ -795,6 +799,11 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
             }
             throw new IllegalArgumentException("incorrect position: " + position);
         }
+    }
+
+    private static boolean canHandleIntent(@NonNull Context context, @Nullable Intent intent) {
+        List<ResolveInfo> resolveInfos = intent != null ? context.getPackageManager().queryIntentActivities(intent, 0) : null;
+        return resolveInfos != null && !resolveInfos.isEmpty();
     }
 
 }
