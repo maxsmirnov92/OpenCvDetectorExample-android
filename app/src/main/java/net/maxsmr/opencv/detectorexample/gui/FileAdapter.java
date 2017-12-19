@@ -1,4 +1,4 @@
-package net.maxsmr.opencv.detectorexample.gui.adapters;
+package net.maxsmr.opencv.detectorexample.gui;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -32,7 +32,7 @@ public class FileAdapter extends BaseRecyclerViewAdapter<File, FileAdapter.ViewH
     }
 
     @Override
-    protected boolean allowSetLongClickListener() {
+    protected boolean allowSetLongClickListener(@Nullable final File item, final int position) {
         return true;
     }
 

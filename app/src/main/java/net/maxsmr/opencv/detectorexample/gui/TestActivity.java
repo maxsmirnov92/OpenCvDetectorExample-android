@@ -68,7 +68,6 @@ import net.maxsmr.opencv.commondetector.utils.OpenCvUtils;
 import net.maxsmr.opencv.detectorexample.app.DefaultSettings;
 import net.maxsmr.opencv.detectorexample.R;
 import net.maxsmr.opencv.detectorexample.app.Paths;
-import net.maxsmr.opencv.detectorexample.gui.adapters.FileAdapter;
 
 public class TestActivity extends AppCompatActivity implements View.OnClickListener, AdapterView.OnItemSelectedListener, BaseRecyclerViewAdapter.OnItemClickListener<File>,
         BaseRecyclerViewAdapter.OnItemsRemovedListener<File>, DialogProgressable.OnBackPressedListener, DialogInterface.OnDismissListener {
@@ -190,7 +189,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initToolbar() {
         String title = getTitle().toString();
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         if (toolbar != null) {
             toolbar.setNavigationIcon(null);
             toolbar.setTitle(title);
@@ -217,13 +216,13 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
 
     private void initSpinner() {
         SpinnerAdapter spinnerAdapter = ArrayAdapter.createFromResource(getApplicationContext(), R.array.category, R.layout.spinner_dropdown_item);
-        navigationSpinner = (Spinner) findViewById(R.id.spinnerCategory);
+        navigationSpinner = findViewById(R.id.spinnerCategory);
         navigationSpinner.setAdapter(spinnerAdapter);
         navigationSpinner.setOnItemSelectedListener(this);
     }
 
     private void initRecycler() {
-        filesRecycler = (RecyclerView) findViewById(R.id.rvVideoFiles);
+        filesRecycler = findViewById(R.id.rvVideoFiles);
         fileAdapter = new FileAdapter(this, null);
         fileAdapter.setOnItemClickListener(this);
         fileAdapter.setOnItemsRemovedListener(this);
@@ -261,7 +260,8 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                             if (GraphicUtils.canDecodeVideo(file)) {
                                 File newFile = new File(Paths.getDefaultVideosDirPath().getAbsolutePath(), file.getName());
                                 if (!FileHelper.isFileExists(newFile.getAbsolutePath())) {
-                                    newFile = FileHelper.copyFile(file, Paths.getDefaultVideosDirPath().getAbsolutePath());
+                                    File videosDir = Paths.getDefaultVideosDirPath();
+                                    newFile = FileHelper.copyFile(file,  videosDir.getParent(), file.getName(), true);
                                 }
                                 fileAdapter.addItem(newFile);
                                 displayFilesList();
@@ -481,12 +481,27 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     }
 
     private void restoreAdapterVideosFromWorkingDir() {
-        List<File> videos = FileHelper.getFiles(Paths.getDefaultVideosDirPath(), false, new Comparator<File>() {
+        Set<File> videos = FileHelper.getFiles(Collections.singletonList(Paths.getDefaultVideosDirPath()), FileHelper.GetMode.FILES, new Comparator<File>() {
             @Override
             public int compare(File lhs, File rhs) {
-                return CompareUtils.compareStrings(lhs.getName(), rhs.getName(), true);
+                return CompareUtils.compareStrings(lhs.getName(), rhs.getName(), true, true);
             }
-        });
+        }, new FileHelper.IGetNotifier() {
+            @Override
+            public boolean onProcessing(@NonNull File current, @NonNull Set<File> collected, int currentLevel) {
+                return true;
+            }
+
+            @Override
+            public boolean onGetFile(@NonNull File file) {
+                return true;
+            }
+
+            @Override
+            public boolean onGetFolder(@NonNull File folder) {
+                return true;
+            }
+        }, FileHelper.DEPTH_UNLIMITED);
         if (!fileAdapter.isEmpty()) {
             fileAdapter.clearItems();
         }
@@ -528,7 +543,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
         this.dialogProgressable.setOnBackPressedListener(this);
         this.dialogProgressable.setOnDismissListener(this);
         this.dialogProgressable.setMessage(getString(R.string.processing));
-        this.dialogProgressable.setIndeterminate(true, 0);
+        this.dialogProgressable.setIndeterminate(true);
         this.dialogProgressable.setCancelable(false);
         this.dialogProgressable.onStart();
     }
@@ -599,6 +614,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
     private class DetectorTaskRunnable implements Runnable {
 
         long startTime = 0;
+
         boolean isRunning = false;
 
         boolean isCancelled = false;
@@ -692,7 +708,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                             Bitmap sceneImageBitmap = GraphicUtils.createBitmapFromFile(lastPictureFile, 1);
                             if (sceneImageBitmap != null) {
                                 byte[] sceneImage = GraphicUtils.getBitmapData(sceneImageBitmap);
-                                ObjectDetectFrameInfo info = detector.detectObjectByByteArray(sceneImage, true, 0, sceneImageBitmap.getWidth(), sceneImageBitmap.getHeight(), DETECTOR_SENSITIVITY.HIGH, null);
+                                ObjectDetectFrameInfo info = detector.detectObjectByByteArray(sceneImage, true, 0, sceneImageBitmap.getWidth(), sceneImageBitmap.getHeight(), DetectorSensivity.HIGH, null);
                                 logger.debug("info=" + info);
                                 Mat resultMat = OpenCvUtils.convertByteArrayToMat(info.getSceneImage(), info.getWidth(), info.getHeight(), info.getType());
                                 Bitmap resultBitmap = OpenCvUtils.convertMatToBitmap(resultMat, true);
