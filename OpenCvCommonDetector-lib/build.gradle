@@ -23,7 +23,7 @@ android {
 }
 
 dependencies {
-    implementation project(':opencv-library')
+    compile project(':opencv-library')
 
-    implementation "net.maxsmr:commonutils:$commonUtilsVersion"
+    compile "net.maxsmr:commonutils:$commonUtilsVersion"
 }

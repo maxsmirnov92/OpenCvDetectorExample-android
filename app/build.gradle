@@ -31,10 +31,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
 
     implementation project(':OpenCvAndroidDetector-lib')
-    implementation project(':OpenCvCommonDetector-lib')
-    implementation project(':opencv-library')
 
     implementation files('libs/FileDialog-0.1.jar')
-    implementation "net.maxsmr:recyclerview-lib:$recyclerViewLibVersion"
-    implementation "net.maxsmr:commonutils:$commonUtilsVersion"
 }
