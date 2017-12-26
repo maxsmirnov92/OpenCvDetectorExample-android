@@ -12,7 +12,7 @@ public class DefaultObjectDetectorSettings {
 
     public final static boolean DEFAULT_DEBUG_MODE = false;
 
-    public final static OBJECT_TYPE DEFAULT_OBJECT_TYPE = OBJECT_TYPE.UNKNOWN;
+    public final static ObjectType DEFAULT_OBJECT_TYPE = ObjectType.UNKNOWN;
 
     public final static boolean DEFAULT_GRAYSCALE = true; // AbstractClassifierDetector.DEFAULT_GRAYSCALE
 }

@@ -33,4 +33,5 @@ dependencies {
     implementation project(':OpenCvAndroidDetector-lib')
 
     implementation files('libs/FileDialog-0.1.jar')
+    implementation "net.maxsmr:recyclerview-lib:$recyclerViewLibVersion"
 }

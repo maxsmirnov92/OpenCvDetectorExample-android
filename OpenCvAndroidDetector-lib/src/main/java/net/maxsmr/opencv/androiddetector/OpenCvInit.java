@@ -22,13 +22,21 @@ public final class OpenCvInit {
     @NonNull
     private final Context mContext;
 
-    private OpenCvInit(@NonNull Context ctx) {
-        logger.debug("OpenCvInit()");
+
+    private OpenCvInitListener initListener;
+
+    private boolean isOpenCvManagerLoaded = false;
+
+    private boolean isOpenCvManagerInitComplete = false;
+
+    private OpenCvInit(@NonNull Context ctx, boolean allowInstall) {
 
         mContext = ctx;
 
         try {
-            initOpenCvManager();
+
+            initOpenCvManager(allowInstall);
+
         } catch (RuntimeException e) {
             logger.error("a RuntimeException occured during initOpenCvManager(): {}", e.getMessage());
 
@@ -42,11 +50,11 @@ public final class OpenCvInit {
 
     }
 
-    public static void initInstance(@NonNull Context context) {
+    public static void initInstance(@NonNull Context context, boolean allowInstall) {
         if (mInstance == null) {
             logger.debug("initInstance()");
             synchronized (OpenCvInit.class) {
-                mInstance = new OpenCvInit(context);
+                mInstance = new OpenCvInit(context, allowInstall);
             }
         }
     }
@@ -60,28 +68,27 @@ public final class OpenCvInit {
     }
 
 
-    private OpenCvInitListener initListener;
-
     public void setOpenCvInitListener(OpenCvInitListener listener) {
         initListener = listener;
     }
-
-    private boolean isOpenCvManagerLoaded = false;
 
     public boolean isOpenCvManagerLoaded() {
         return isOpenCvManagerLoaded;
     }
 
-    private boolean isOpenCvManagerInitComplete = false;
-
     public boolean isOpenCvManagerInitComplete() {
         return isOpenCvManagerInitComplete;
     }
 
-    private boolean initOpenCvManager() {
+    private boolean initOpenCvManager(boolean allowInstall) {
         logger.debug("initOpenCvManager()");
 
-        if (OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, mContext, new BaseLoaderCallback(mContext) {
+        if (!OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION_2_4_9, mContext, new BaseLoaderCallback(mContext) {
+            @Override
+            protected boolean allowShowDialogs() {
+                return true;
+            }
+
             @Override
             public void onManagerConnected(int status) {
                 super.onManagerConnected(status);
@@ -111,16 +118,16 @@ public final class OpenCvInit {
                 }
             }
         })) {
-            return true;
-        }
-        logger.error("Cannot connect to OpenCV Manager");
-        isOpenCvManagerInitComplete = true;
-        isOpenCvManagerLoaded = false;
+            logger.error("Cannot connect to OpenCV Manager");
+            isOpenCvManagerInitComplete = true;
+            isOpenCvManagerLoaded = false;
 
-        if (initListener != null) {
-            initListener.onOpenCvInitFailure();
+            if (initListener != null) {
+                initListener.onOpenCvInitFailure();
+            }
+            return false;
         }
-        return false;
+        return true;
     }
 
     public interface OpenCvInitListener {

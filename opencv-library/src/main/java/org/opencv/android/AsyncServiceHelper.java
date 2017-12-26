@@ -53,16 +53,13 @@ class AsyncServiceHelper
     protected static boolean InstallServiceQuiet(Context context)
     {
         boolean result = true;
-        try
-        {
-            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(OPEN_CV_SERVICE_URL));
-            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            context.startActivity(intent);
-        }
-        catch(Exception e)
-        {
-            result = false;
-        }
+            try {
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(OPEN_CV_SERVICE_URL));
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                context.startActivity(intent);
+            } catch (Exception e) {
+                result = false;
+            }
 
         return result;
     }

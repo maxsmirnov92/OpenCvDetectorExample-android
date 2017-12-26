@@ -2,7 +2,7 @@ package net.maxsmr.opencv.detectorexample.app;
 
 import net.maxsmr.opencv.commondetector.model.DetectorSensivity;
 import net.maxsmr.opencv.commondetector.model.motion.settings.MotionDetectorSettings;
-import net.maxsmr.opencv.commondetector.model.object.settings.OBJECT_TYPE;
+import net.maxsmr.opencv.commondetector.model.object.settings.ObjectType;
 import net.maxsmr.opencv.commondetector.model.object.settings.ObjectDetectorSettings;
 
 public class DefaultSettings {
@@ -19,7 +19,7 @@ public class DefaultSettings {
     public static ObjectDetectorSettings generateDefaultObjectDetectorSettings() {
         ObjectDetectorSettings s = new ObjectDetectorSettings();
         s.setGrayscale(true);
-        s.setType(OBJECT_TYPE.HUMAN);
+        s.setType(ObjectType.HUMAN);
         s.setFramesToAnalyze(30);
         s.setSensitivity(DetectorSensivity.HIGH);
         return s;

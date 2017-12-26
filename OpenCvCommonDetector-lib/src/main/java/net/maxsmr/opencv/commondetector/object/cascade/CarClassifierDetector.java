@@ -5,7 +5,7 @@ import net.maxsmr.opencv.commondetector.utils.DetectorHelper;
 import net.maxsmr.opencv.commondetector.model.graphic.Point;
 import net.maxsmr.opencv.commondetector.model.graphic.Rect;
 import net.maxsmr.opencv.commondetector.model.object.info.ObjectDetectFrameInfo;
-import net.maxsmr.opencv.commondetector.model.object.settings.OBJECT_TYPE;
+import net.maxsmr.opencv.commondetector.model.object.settings.ObjectType;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -279,7 +279,7 @@ public class CarClassifierDetector extends AbstractClassifierDetector {
 		// GraphicUtils.getBitmapData(OpenCvUtils.convertMatToBitmap(outputImage, false))
 
 		ObjectDetectFrameInfo info = new ObjectDetectFrameInfo(OpenCvUtils.convertMatToByteArray(outputImage), outputImage.type(),
-				outputImage.cols(), outputImage.rows(), detectedCarsCount > 0, OBJECT_TYPE.CAR, detectedCars, System.currentTimeMillis()
+				outputImage.cols(), outputImage.rows(), detectedCarsCount > 0, ObjectType.CAR, detectedCars, System.currentTimeMillis()
 						- startTime);
 		outputImage.release();
 		return info;

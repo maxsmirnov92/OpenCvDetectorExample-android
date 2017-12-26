@@ -11,7 +11,7 @@ import android.widget.TextView;
 import java.io.File;
 import java.util.List;
 
-import net.maxsmr.android.recyclerview.adapters.BaseRecyclerViewAdapter;
+
 import net.maxsmr.commonutils.graphic.GraphicUtils;
 import net.maxsmr.opencv.detectorexample.R;
 

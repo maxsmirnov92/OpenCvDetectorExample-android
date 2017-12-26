@@ -23,7 +23,7 @@ import net.maxsmr.commonutils.data.FileHelper;
 import net.maxsmr.opencv.commondetector.utils.DetectorHelper;
 import net.maxsmr.opencv.commondetector.model.graphic.Rect;
 import net.maxsmr.opencv.commondetector.model.object.info.ObjectDetectFrameInfo;
-import net.maxsmr.opencv.commondetector.model.object.settings.OBJECT_TYPE;
+import net.maxsmr.opencv.commondetector.model.object.settings.ObjectType;
 
 import net.maxsmr.opencv.commondetector.utils.OpenCvUtils;
 
@@ -151,7 +151,7 @@ public abstract class AbstractClassifierDetector {
      * base object detection by given cascade classifier, can be wrapped by implemented detect(); pre-processing
      * included
      */
-    protected static ObjectDetectFrameInfo detect(CascadeClassifier classifier, OBJECT_TYPE objectType, Mat frame, Size scaleSize,
+    protected static ObjectDetectFrameInfo detect(CascadeClassifier classifier, ObjectType objectType, Mat frame, Size scaleSize,
                                                   List<org.opencv.core.Point> cvRegion, Scalar contourColor, boolean grayscale, File savedFramesDir) {
         logger.debug("detect(), classifier=" + classifier + ", objectType=" + objectType + ", frame=" + frame + ", scaleSize=" + scaleSize
                 + ", cvRegion=" + cvRegion + ", contourColor=" + contourColor + ", grayscale=" + grayscale + ", savedFramesDir="

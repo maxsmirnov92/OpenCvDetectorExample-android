@@ -26,7 +26,7 @@ import android.content.Context;
 
 import net.maxsmr.commonutils.data.FileHelper;
 import net.maxsmr.opencv.commondetector.model.object.info.ObjectDetectFrameInfo;
-import net.maxsmr.opencv.commondetector.model.object.settings.OBJECT_TYPE;
+import net.maxsmr.opencv.commondetector.model.object.settings.ObjectType;
 
 import net.maxsmr.opencv.commondetector.utils.OpenCvUtils;
 
@@ -423,12 +423,12 @@ public class RawObjectDetector {
 
 			// GraphicUtils.getBitmapData(OpenCvUtils.convertMatToBitmap(imgResult, false))
 			return new ObjectDetectFrameInfo(OpenCvUtils.convertMatToByteArray(imgResult), imgResult.type(), imgResult.cols(),
-					imgResult.rows(), true, OBJECT_TYPE.UNKNOWN, null, 0);
+					imgResult.rows(), true, ObjectType.UNKNOWN, null, 0);
 		} else {
 
 			// GraphicUtils.getBitmapData(OpenCvUtils.convertMatToBitmap(imgResult, false))
 			return new ObjectDetectFrameInfo(OpenCvUtils.convertMatToByteArray(imgResult), imgResult.type(), imgResult.cols(),
-					imgResult.rows(), false, OBJECT_TYPE.UNKNOWN, null, 0);
+					imgResult.rows(), false, ObjectType.UNKNOWN, null, 0);
 		}
 	}
 }

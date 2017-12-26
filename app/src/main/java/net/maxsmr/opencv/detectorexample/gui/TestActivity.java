@@ -65,7 +65,7 @@ import net.maxsmr.opencv.commondetector.model.motion.info.MotionDetectVideoInfo;
 import net.maxsmr.opencv.commondetector.model.motion.settings.MotionDetectorSettings;
 import net.maxsmr.opencv.commondetector.model.object.info.ObjectDetectFrameInfo;
 import net.maxsmr.opencv.commondetector.model.object.info.ObjectDetectVideoInfo;
-import net.maxsmr.opencv.commondetector.model.object.settings.OBJECT_TYPE;
+import net.maxsmr.opencv.commondetector.model.object.settings.ObjectType;
 import net.maxsmr.opencv.commondetector.model.object.settings.ObjectDetectorSettings;
 import net.maxsmr.opencv.commondetector.utils.OpenCvUtils;
 import net.maxsmr.opencv.detectorexample.app.DefaultSettings;
@@ -698,7 +698,7 @@ public class TestActivity extends AppCompatActivity implements View.OnClickListe
                             try {
                                 File faceClassifierFile = FileHelper.createNewFile("haarcascade_frontalface_alt.xml", Paths.getDefaultWorkingDir().getAbsolutePath());
                                 FileHelper.copyRawFile(TestActivity.this, R.raw.haarcascade_frontalface_alt, faceClassifierFile, FileHelper.FILE_PERMISSIONS_ALL);
-                                detector = new ClassifierDetector(TestActivity.this, OBJECT_TYPE.FACE, faceClassifierFile, false, null);
+                                detector = new ClassifierDetector(TestActivity.this, ObjectType.FACE, faceClassifierFile, false, null);
                             } catch (Exception e) {
                                 runOnUiThread(new Runnable() {
                                     @Override

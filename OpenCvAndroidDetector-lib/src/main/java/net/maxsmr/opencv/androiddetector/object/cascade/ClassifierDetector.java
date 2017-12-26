@@ -23,7 +23,7 @@ import net.maxsmr.opencv.androiddetector.object.cascade.classifiers.ClassifierRe
 import net.maxsmr.opencv.commondetector.model.DetectorSensivity;
 import net.maxsmr.opencv.commondetector.model.graphic.Point;
 import net.maxsmr.opencv.commondetector.model.object.info.ObjectDetectFrameInfo;
-import net.maxsmr.opencv.commondetector.model.object.settings.OBJECT_TYPE;
+import net.maxsmr.opencv.commondetector.model.object.settings.ObjectType;
 import net.maxsmr.opencv.commondetector.object.cascade.AbstractClassifierDetector;
 import net.maxsmr.opencv.commondetector.object.cascade.BaseClassifierDetector;
 import net.maxsmr.opencv.commondetector.object.cascade.CarClassifierDetector;
@@ -35,11 +35,11 @@ public class ClassifierDetector extends AbstractObjectDetector {
 
     private static final Logger logger = LoggerFactory.getLogger(ClassifierDetector.class);
 
-    public static final OBJECT_TYPE DEFAULT_OBJECT_TYPE = OBJECT_TYPE.UNKNOWN;
+    public static final ObjectType DEFAULT_OBJECT_TYPE = ObjectType.UNKNOWN;
 
     private final Context mContext;
 
-    private OBJECT_TYPE objectType = DEFAULT_OBJECT_TYPE;
+    private ObjectType objectType = DEFAULT_OBJECT_TYPE;
 
     private AbstractClassifierDetector classifierDetector;
 
@@ -49,7 +49,7 @@ public class ClassifierDetector extends AbstractObjectDetector {
 
     private Mat lastFrame;
 
-    public OBJECT_TYPE getObjectType() {
+    public ObjectType getObjectType() {
         return objectType;
     }
 
@@ -57,7 +57,7 @@ public class ClassifierDetector extends AbstractObjectDetector {
      * @param defaultClassifier use custom xml classifier with BaseClassifierDetector; if null it will be taken from
      *                          resources
      */
-    public synchronized void setObjectType(OBJECT_TYPE objectType, File defaultClassifier) throws IOException, InterruptedException {
+    public synchronized void setObjectType(ObjectType objectType, File defaultClassifier) throws IOException, InterruptedException {
 
         if (objectType == null)
             throw new NullPointerException("objectType is null");
@@ -77,7 +77,7 @@ public class ClassifierDetector extends AbstractObjectDetector {
                 case HUMAN:
 
 //				if (!FileHelper.copyRawFile(mContext, R.raw.hogcascade_pedestrians,
-//						classifierFile = new File(mContext.getFilesDir(), OBJECT_TYPE.HUMAN.name() + ".xml"),
+//						classifierFile = new File(mContext.getFilesDir(), ObjectType.HUMAN.name() + ".xml"),
 //						FileHelper.FILE_PERMISSIONS_ALL))
 //					throw new RuntimeException("copy resource " + R.raw.hogcascade_pedestrians + " failed");
 
@@ -141,7 +141,7 @@ public class ClassifierDetector extends AbstractObjectDetector {
     }
 
     // int defaultClassifierResourceId, String defaultClassifierName
-    public ClassifierDetector(Context ctx, OBJECT_TYPE objectType, File defaultClassifierFile, boolean grayscale, File savedFramesDir)
+    public ClassifierDetector(Context ctx, ObjectType objectType, File defaultClassifierFile, boolean grayscale, File savedFramesDir)
             throws IOException, InterruptedException {
         logger.debug("ClassifierDetector(), objectType=" + objectType + ", defaultClassifierFile=" + defaultClassifierFile + ", grayscale="
                 + grayscale + ", savedFramesDir=" + savedFramesDir);

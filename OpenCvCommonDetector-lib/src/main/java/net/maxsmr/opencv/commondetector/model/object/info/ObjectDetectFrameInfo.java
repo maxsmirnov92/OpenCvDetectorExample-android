@@ -1,7 +1,7 @@
 package net.maxsmr.opencv.commondetector.model.object.info;
 
 import net.maxsmr.opencv.commondetector.model.graphic.Rect;
-import net.maxsmr.opencv.commondetector.model.object.settings.OBJECT_TYPE;
+import net.maxsmr.opencv.commondetector.model.object.settings.ObjectType;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -67,13 +67,13 @@ public class ObjectDetectFrameInfo implements Serializable {
 	}
 
 	
-	private OBJECT_TYPE objectType = OBJECT_TYPE.UNKNOWN;
+	private ObjectType objectType = ObjectType.UNKNOWN;
 
-	public OBJECT_TYPE getObjectType() {
+	public ObjectType getObjectType() {
 		return objectType;
 	}
 
-	public void setObjectType(OBJECT_TYPE objectType) {
+	public void setObjectType(ObjectType objectType) {
 		if (objectType != null)
 			this.objectType = objectType;
 	}
@@ -116,7 +116,7 @@ public class ObjectDetectFrameInfo implements Serializable {
 	public ObjectDetectFrameInfo() {
 	}
 
-	public ObjectDetectFrameInfo(byte[] sceneImage, int type, int width, int height, boolean detected, OBJECT_TYPE objectType,
+	public ObjectDetectFrameInfo(byte[] sceneImage, int type, int width, int height, boolean detected, ObjectType objectType,
 			List<Rect> objects, long processingTime) {
 		setSceneImage(sceneImage);
 		setType(type);

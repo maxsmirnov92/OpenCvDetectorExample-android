@@ -1,7 +1,7 @@
 package net.maxsmr.opencv.commondetector.object.cascade;
 
 import net.maxsmr.opencv.commondetector.model.object.info.ObjectDetectFrameInfo;
-import net.maxsmr.opencv.commondetector.model.object.settings.OBJECT_TYPE;
+import net.maxsmr.opencv.commondetector.model.object.settings.ObjectType;
 
 import java.io.File;
 import java.util.List;
@@ -21,20 +21,20 @@ public class BaseClassifierDetector extends AbstractClassifierDetector {
 		return isClassifierLoaded(baseClassifier);
 	}
 
-	private OBJECT_TYPE objectType;
+	private ObjectType objectType;
 
-	public OBJECT_TYPE getObjectType() {
+	public ObjectType getObjectType() {
 		return objectType;
 	}
 
-	public void setObjectType(OBJECT_TYPE objectType) {
+	public void setObjectType(ObjectType objectType) {
 		if (objectType == null) {
 			throw new NullPointerException("objectType is null");
 		}
 		this.objectType = objectType;
 	}
 
-	public BaseClassifierDetector(File baseClassifierFile, OBJECT_TYPE objectType) {
+	public BaseClassifierDetector(File baseClassifierFile, ObjectType objectType) {
 		loadBaseClassifier(baseClassifierFile);
 		setObjectType(objectType);
 	}

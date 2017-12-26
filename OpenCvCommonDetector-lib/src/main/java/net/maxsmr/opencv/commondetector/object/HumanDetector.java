@@ -24,7 +24,7 @@ import android.graphics.Bitmap;
 import net.maxsmr.commonutils.data.FileHelper;
 import net.maxsmr.commonutils.graphic.GraphicUtils;
 import net.maxsmr.opencv.commondetector.model.object.info.ObjectDetectFrameInfo;
-import net.maxsmr.opencv.commondetector.model.object.settings.OBJECT_TYPE;
+import net.maxsmr.opencv.commondetector.model.object.settings.ObjectType;
 
 import net.maxsmr.opencv.commondetector.utils.OpenCvUtils;
 
@@ -142,7 +142,7 @@ public class HumanDetector {
 		// GraphicUtils.getBitmapData(OpenCvUtils.convertMatToBitmap(imgResult, false))
 
 		return new ObjectDetectFrameInfo(OpenCvUtils.convertMatToByteArray(imgResult), imgResult.type(), imgResult.cols(),
-				imgResult.rows(), detectionResult, OBJECT_TYPE.HUMAN, locations2, execTime);
+				imgResult.rows(), detectionResult, ObjectType.HUMAN, locations2, execTime);
 	}
 
 	public static ObjectDetectFrameInfo findHuman(Bitmap sceneBitmap, Scalar rectColor, Scalar fontColor) {

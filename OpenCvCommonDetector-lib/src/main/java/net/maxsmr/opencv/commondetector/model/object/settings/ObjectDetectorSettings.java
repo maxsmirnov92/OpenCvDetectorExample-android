@@ -101,13 +101,13 @@ public class ObjectDetectorSettings implements IDetectorSettings, Serializable {
 	}
 
 	
-	OBJECT_TYPE type = DefaultObjectDetectorSettings.DEFAULT_OBJECT_TYPE;
+	ObjectType type = DefaultObjectDetectorSettings.DEFAULT_OBJECT_TYPE;
 
-	public OBJECT_TYPE getType() {
+	public ObjectType getType() {
 		return type;
 	}
 
-	public void setType(OBJECT_TYPE type) {
+	public void setType(ObjectType type) {
 		if (type != null)
 			this.type = type;
 	}
@@ -116,7 +116,7 @@ public class ObjectDetectorSettings implements IDetectorSettings, Serializable {
 	}
 
 	public ObjectDetectorSettings(DetectorSensivity sensitivity, int frameToDetect, boolean takePhoto, int framesToAnalyze,
-                                  boolean debugMode, boolean grayscale, List<Point> region, OBJECT_TYPE type) {
+                                  boolean debugMode, boolean grayscale, List<Point> region, ObjectType type) {
 		setSensitivity(sensitivity);
 		setFrameToDetect(frameToDetect);
 		setTakePhoto(takePhoto);
